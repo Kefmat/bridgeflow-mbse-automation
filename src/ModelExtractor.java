@@ -4,7 +4,7 @@ import java.util.List;
 
 public class ModelExtractor {
     public static void main(String[] args) {
-        // Filstier (Sørg for at mappen legacy_excel og filen VBA_Export.csv eksisterer)
+        // Filstier
         String csvFile = "legacy_excel/VBA_Export.csv";
         String jsonOutputFile = "requirements.json";
         List<Requirement> requirementList = new ArrayList<>();
