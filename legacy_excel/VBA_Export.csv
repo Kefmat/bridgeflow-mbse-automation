@@ -1,0 +1,3 @@
+ID;Requirement_Name;Description;Priority
+VBA-101;Fuel_System;Must handle jet fuel A1;High
+VBA-102;Wing_Span;Maximum 12 meters;Medium
