@@ -1,79 +1,89 @@
-# BridgeFlow-MBSE: Digital Thread Automation
+# BridgeFlow-MBSE
 
-**BridgeFlow-MBSE** er en Proof-of-Concept (PoC) utviklet for å demonstrere automatisering av dataflyt i komplekse systems engineering-prosjekter. Prosjektet broer gapet mellom ustrukturerte legacy-data (Excel/VBA) og strukturerte modell-data ved bruk av Java og moderne DevOps-prinsipper.
+**BridgeFlow-MBSE** er et teknisk proof‑of‑concept som demonstrerer automatisert dataflyt for komplekse systems engineering‑prosjekter. Løsningen gir en digital bro mellom ustrukturerte legacy-data (Excel/VBA) og strukturerte modell-data ved hjelp av Java og moderne DevOps‑praksis.
 
+---
 
-## Systemarkitektur
+## Funksjoner
 
-Prosjektet følger en modulær arkitektur som sikrer dataintegritet gjennom hele livssyklusen fra eksport til ferdig rapport.
+- Import av legacy-ingeniørdata via VBA og CSV
+- Java-basert validerings- og transformasjonsmotor
+- JSON som mellomformat for datautveksling
+- Automatisk Markdown‑rapportering med Node.js
+- Modulær arkitektur for utvidbarhet og gjenbruk
+
+## Arkitektur
+
+Pipelinen består av tre uavhengige domener:
 
 ```mermaid
 graph TD
-    subgraph "Legacy Domain (Excel/VBA)"
-        A[Ingeniør-data i Excel] -->|VBA Export Script| B(VBA_Export.csv)
+    subgraph "Legacy-domenet (Excel/VBA)"
+        A[Ingeniørdata] -->|VBA-eksportskript| B(VBA_Export.csv)
     end
 
-    subgraph "DevOps Pipeline (Java Engine)"
-        B -->|File I/O| C[ModelExtractor.java]
-        C -->|Object Validation| D{Requirement.java}
-        D -->|Valid Data| E[JSON Transformer]
+    subgraph "Behandlingsdomenet (Java)"
+        B -->|Fil-I/O| C[ModelExtractor.java]
+        C -->|Validering| D{Requirement.java}
+        D -->|Gyldige data| E[JSON-output]
     end
 
-    subgraph "Reporting Domain (JS/Node)"
-        E -->|Intermediate Data| F(requirements.json)
-        F -->|Processing| G[report_generator.js]
-        G -->|Output| H[Engineering_Status.md]
+    subgraph "Rapporteringsdomenet (Node.js)"
+        E -->|Konsumerer| F(requirements.json)
+        F -->|Genererer| G[report_generator.js]
+        G -->|Produserer| H[Engineering_Status.md]
     end
 
-    style A fill:#f9f,stroke:#333,stroke-width:2px
-    style H fill:#bbf,stroke:#333,stroke-width:4px
+    style A fill:#f4f4f4,stroke:#333,stroke-width:2px
+    style H fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+```
 
-Teknisk Stack & Funksjonalitet
-1. Legacy Integration (VBA)
-Kilde: Simulerer ingeniørdata lagret i komplekse Excel-ark.
+Hver komponent har et klart definert ansvar, noe som gjør det mulig å bytte implementasjoner (f.eks. CSV → REST‑API) uten å påvirke etterfølgende logikk.
 
-Logikk: Bruker VBA-skript for å eksportere krav til et flatt filformat (CSV) for videre prosessering.
+## Prosjektstruktur
 
-2. Model Engine (Java)
-Requirement.java: En robust klasse som transformerer rådata til objekter med innebygd validering logikk.
+```
+legacy_excel/       # Excel-arbeidsbok og VBA-eksportskript
+output/             # Genererte JSON- og Markdown-rapporter
+scripts/            # Node.js-rapportgenerator
+src/                # Java-kildekode
+README.md           # Prosjektdokumentasjon
+run_pipeline.bat    # Hjælpeskript for Windows
+```
 
-ModelExtractor.java: Fungerer som en "vaktpost" (Gatekeeper) som leser legacy-data, forkaster ugyldige krav, og eksporterer til et standardisert JSON-format.
+## Forutsetninger
 
-Fokus: Objektorientert programmering (OOP) og datavalidering.
+- **Java JDK 11+** installert og på `PATH`
+- **Node.js 14+** (for rapportgeneratoren)
+- Valgfritt: Git for versjonskontroll
 
-3. Reporting & DevOps (JavaScript/Node.js)
-report_generator.js: Konsumerer de validerte dataene og produserer automatiserte rapporter i Markdown.
+## Kjøring av pipelinen
 
-Automatisering: Sikrer "Single Source of Truth" ved å fjerne manuelt "kopi-lim" arbeid.
+### Automatisk (Windows)
 
+Dobbeltklikk `run_pipeline.bat` eller kjør:
 
-## Slik kjøres pipelinen
-For å sikre en sømløs arbeidsflyt brukes en automatiseringsfil som orkestrerer alle stegene.
-
-Forutsetninger
-Java JDK installert
-
-Node.js installert
-
-Kjøring (Windows)
-Dobbeltklikk på run_pipeline.bat eller kjør i terminal:
-
-Bash
+```powershell
 .\run_pipeline.bat
-Kjøring (Manuell)
-Kompiler: javac src/*.java
+```
 
-Transformer: java -cp src ModelExtractor
+### Manuelle steg
 
-Rapporter: node scripts/report_generator.js
+```bash
+# kompiler Java
+javac src/*.java
 
+# transformer legacy CSV til JSON
+java -cp src ModelExtractor
+
+# generer Markdown-rapport
+node scripts/report_generator.js
+```
+
+Resultatfilene finner du i `output/`.
 
 ## Designfilosofi
 
-Modularitet: Hvert steg i pipelinen er uavhengig. Vi kan bytte ut kilden (f.eks. fra CSV til REST API) uten å endre rapporteringslogikken.
-
-Skalerbarhet: Java-motoren er forberedt for integrasjon mot tunge MBSE-verktøy som Cameo Systems Modeler eller 3DExperience.
-
-Sporbarhet: Ved å bruke en "Digital Thread"-tilnærming sikrer vi at hvert krav kan spores fra kilde til rapport uten menneskelige feil.
-
-Utviklet som et teknisk dypdykk i DevOps for Systems Engineering.
+- **Modularitet:** Hvert trinn kan erstattes eller utvides uavhengig.
+- **Skalerbarhet:** Java‑motoren er laget for integrasjon med MBSE‑verktøy som Cameo Systems Modeler eller 3DExperience.
+- **Sporbarhet:** Digital‑thread tilnærming sikrer at hvert krav er sporbart fra kilde til rapport og reduserer manuelle feil.
