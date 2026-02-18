@@ -1,35 +1,63 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ModelExtractor {
     public static void main(String[] args) {
+        // Filstier (Sørg for at mappen legacy_excel og filen VBA_Export.csv eksisterer)
         String csvFile = "legacy_excel/VBA_Export.csv";
-        String line = "";
-        String cvsSplitBy = ";";
+        String jsonOutputFile = "requirements.json";
+        List<Requirement> requirementList = new ArrayList<>();
 
-        System.out.println("--- BridgeFlow: Importing from Legacy VBA Export ---");
+        System.out.println(">>> BridgeFlow: Starting Pipeline (VBA -> Java -> JSON)");
 
         try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
-            // Hopper over header-linjen
-            br.readLine(); 
+            String line;
+            br.readLine(); // Hopper over header-linjen i CSV-en
 
             while ((line = br.readLine()) != null) {
-                String[] data = line.split(cvsSplitBy);
+                // Splitter på semikolon slik vi definerte i VBA-eksporten
+                String[] values = line.split(";");
                 
-                // data[0] = ID, data[1] = Name, data[2] = Desc
-                System.out.println("[JAVA PLUGIN] Processing: " + data[1] + " (ID: " + data[0] + ")");
-                
-                // Her ville vi i virkeligheten brukt Cameo API til å lage et objekt:
-                // Application.getInstance().getProject().getElementsFactory().createRequirement()...
+                if (values.length >= 4) {
+                    Requirement req = new Requirement(values[0], values[1], values[3]);
+
+                    if (req.isValid()) {
+                        requirementList.add(req);
+                        System.out.println("[PARSED] " + req);
+                    }
+                }
             }
-            
-            System.out.println("[SUCCESS] All VBA requirements imported to Model.");
+
+            // Utfører selve eksporten til JSON
+            writeToJson(requirementList, jsonOutputFile);
 
         } catch (IOException e) {
-            System.err.println("[ERROR] Could not read VBA export file: " + e.getMessage());
+            System.err.println("[ERROR] Fant ikke filen eller feil ved lesing: " + e.getMessage());
+        }
+    }
+
+    private static void writeToJson(List<Requirement> list, String filename) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
+            writer.write("[\n");
+            
+            for (int i = 0; i < list.size(); i++) {
+                Requirement r = list.get(i);
+                writer.write("  {\n");
+                writer.write("    \"id\": \"" + r.getId() + "\",\n");
+                writer.write("    \"name\": \"" + r.getName() + "\",\n");
+                writer.write("    \"status\": \"Validated via Java\"\n");
+                writer.write("  }");
+                
+                // Legger til komma mellom alle objekter unntatt det siste
+                if (i < list.size() - 1) {
+                    writer.write(",");
+                }
+                writer.write("\n");
+            }
+            
+            writer.write("]");
+            System.out.println("[SUCCESS] JSON-fil oppdatert: " + filename);
         }
     }
 }
