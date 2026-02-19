@@ -2,6 +2,7 @@
 
 **BridgeFlow-MBSE** er et teknisk proof‑of‑concept som demonstrerer automatisert dataflyt for komplekse systems engineering‑prosjekter. Løsningen gir en digital bro mellom ustrukturerte legacy-data (Excel/VBA) og strukturerte modell-data ved hjelp av Java og moderne DevOps‑praksis.
 
+![CI Status](https://github.com/Kefmat/bridgeflow-mbse-automation/actions/workflows/pipeline.yml/badge.svg) 
 ---
 
 ## Funksjoner
