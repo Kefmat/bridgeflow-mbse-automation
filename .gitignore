@@ -1,3 +1,16 @@
+# Java kompilerte filer
 *.class
-node_modules/
+
+# Genererte datafiler (mellomledd)
+requirements.json
+
+# Logger
+logs/
+!logs/.gitkeep
+
+# Output/Rapporter (disse genereres av pipelinen)
+output/
+
+# OS-spesifikke filer
 .DS_Store
+Thumbs.db
