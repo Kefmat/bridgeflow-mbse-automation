@@ -1,36 +1,40 @@
 @echo off
+title BridgeFlow MBSE Pipeline
+cls
 echo ========================================
-echo BRIDGEFLOW: QUALITY-GATED PIPELINE
+echo   BRIDGEFLOW: END-TO-END AUTOMATION
 echo ========================================
 
-:: 1. Kompiler alt
-echo [1/4] Compiling source and tests...
+:: 1. Kompilering
+echo [1/4] Kompilerer Java-komponenter...
 javac src/*.java
 if %errorlevel% neq 0 (
-    echo [ERROR] Compilation failed!
+    echo [FEIL] Kompilering feilet. Sjekk Java-koden.
     pause
     exit /b 1
 )
 
-:: 2. KJØR TESTER
-echo [2/4] Running Automated Quality Tests...
+:: 2. Kvalitetssjekk (Unit Tests)
+echo [2/4] Kjorer Quality Gate (Enhetstester)...
 java -cp src RequirementTest
 if %errorlevel% neq 0 (
-    echo [CRITICAL ERROR] Quality tests failed! Pipeline aborted.
-    echo Report will not be generated until code is fixed.
+    echo [STOPP] Quality Gate feilet! Pipelinen er avbrutt for a hindre korrupte data.
     pause
     exit /b 1
 )
 
-:: 3. Transformer data
-echo [3/4] Running Java Model Extractor...
+:: 3. Transformasjon
+echo [3/4] Transformerer modell-data (CSV til JSON)...
 java -cp src ModelExtractor
+if %errorlevel% neq 0 exit /b 1
 
-:: 4. Generer rapport
-echo [4/4] Generating Engineering Report...
+:: 4. Rapport
+echo [4/4] Genererer visuelt dashboard...
 node scripts/report_generator.js
 
 echo ========================================
-echo SUCCESS: Data validated and report generated!
+echo   PIPELINE FULLFORT - Sjekk /output/
 echo ========================================
+:: Apner det visuelle dashboardet automatisk i standard nettleser
+start "" "output\dashboard.html"
 pause

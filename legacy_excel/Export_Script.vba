@@ -1,15 +1,28 @@
-' Dette er VBA-kode som ville ligget inne i ingeniørens Excel-ark
-Sub ExportRequirementsToBridgeFlow()
-    Dim myFile As String
-    myFile = ThisWorkbook.Path & "\VBA_Export.csv"
+Sub ExportAndRunPipeline()
+    Dim fileName As String
+    Dim i As Integer
+    Dim fileNum As Integer
     
-    Open myFile For Output As #1
-    Print #1, "ID;Requirement_Name;Description;Priority"
+    ' Definerer filsti
+    fileName = ThisWorkbook.Path & "\legacy_excel\VBA_Export.csv"
     
-    ' Simulerer gjennomgang av rader i Excel
-    Print #1, "VBA-101;Fuel_System;Must handle jet fuel A1;High"
-    Print #1, "VBA-102;Wing_Span;Maximum 12 meters;Medium"
+    ' Eksporterer data til CSV
+    fileNum = FreeFile
+    Open fileName For Output As #fileNum
+    Print #fileNum, "ID;Name;Status;Priority" ' Header
     
-    Close #1
-    MsgBox "Data eksportert til BridgeFlow Java-plugin!"
+    For i = 2 To 10 ' Går gjennom rad 2 til 10
+        If Cells(i, 1).Value <> "" Then
+            Print #fileNum, Cells(i, 1).Value & ";" & Cells(i, 2).Value & ";" & _
+                           Cells(i, 3).Value & ";" & Cells(i, 4).Value
+        End If
+    Next i
+    
+    Close #fileNum
+    
+    MsgBox "Eksport vellykket! Starter BridgeFlow Pipeline...", vbInformation
+    
+    ' STARTER PIPELINEN AUTOMATISK
+    ' Dette kjører .bat-filen direkte fra Excel
+    Shell "cmd.exe /c cd /d " & ThisWorkbook.Path & " && run_pipeline.bat", vbNormalFocus
 End Sub
