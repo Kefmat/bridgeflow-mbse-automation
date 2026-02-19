@@ -1,31 +1,36 @@
 @echo off
 echo ========================================
-echo BRIDGEFLOW: STARTING AUTOMATED PIPELINE
+echo BRIDGEFLOW: QUALITY-GATED PIPELINE
 echo ========================================
 
-:: 1. Kompilerer Java-kode
-echo [1/3] Compiling Java source...
+:: 1. Kompiler alt
+echo [1/4] Compiling source and tests...
 javac src/*.java
 if %errorlevel% neq 0 (
-    echo [ERROR] Java compilation failed!
+    echo [ERROR] Compilation failed!
     pause
-    exit /b %errorlevel%
+    exit /b 1
 )
 
-:: 2. Kjører Java-motor for å transformere data
-echo [2/3] Running Java Model Extractor...
-java -cp src ModelExtractor
+:: 2. KJØR TESTER
+echo [2/4] Running Automated Quality Tests...
+java -cp src RequirementTest
 if %errorlevel% neq 0 (
-    echo [ERROR] Java execution failed!
+    echo [CRITICAL ERROR] Quality tests failed! Pipeline aborted.
+    echo Report will not be generated until code is fixed.
     pause
-    exit /b %errorlevel%
+    exit /b 1
 )
 
-:: 3. Kjører Node.js for å generere rapport
-echo [3/3] Generating Engineering Report...
+:: 3. Transformer data
+echo [3/4] Running Java Model Extractor...
+java -cp src ModelExtractor
+
+:: 4. Generer rapport
+echo [4/4] Generating Engineering Report...
 node scripts/report_generator.js
 
 echo ========================================
-echo PIPELINE COMPLETE! Check /output folder.
+echo SUCCESS: Data validated and report generated!
 echo ========================================
 pause
