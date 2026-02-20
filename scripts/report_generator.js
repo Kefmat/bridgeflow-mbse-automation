@@ -1,19 +1,23 @@
 /**
- * BridgeFlow Report Generator
- * Transformer JSON-modell til visuelt HTML-dashboard og Markdown-rapport.
- * Inkluderer audit-logging for sporbarhet.
+ * BridgeFlow Report Generator (Refaktorert)
+ * Transformer JSON-modell til profesjonelt dashboard og Markdown.
  */
 
 const fs = require('fs');
 const path = require('path');
 
+// Definerer filstier
 const outputDir = './output';
 const logDir = './logs';
+const cssPath = path.join(__dirname, 'style.css'); // Stien til den nye CSS-fila
 
-// Initialisering av filstruktur
+// Initialisering av mapper
 if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir);
 if (!fs.existsSync(logDir)) fs.mkdirSync(logDir);
 
+/**
+ * Logger hendelser med tidsstempel til både konsoll og loggfil.
+ */
 function writeLog(message) {
     const ts = new Date().toISOString();
     fs.appendFileSync(path.join(logDir, 'pipeline.log'), `[${ts}] ${message}\n`);
@@ -23,44 +27,53 @@ function writeLog(message) {
 try {
     writeLog('Starter generering av rapporter...');
 
-    // Henter validert data fra Java-motoren
+    // Data og CSS
     const rawData = fs.readFileSync('requirements.json');
     const requirements = JSON.parse(rawData);
+    const cssContent = fs.readFileSync(cssPath, 'utf8'); // Henter den ryddige stylingen
     const dateStr = new Date().toLocaleString('no-NO');
 
-    // HTML Dashboard med enkel styling
+    // Dashboard (HTML)
     const html = `
     <!DOCTYPE html>
     <html lang="no">
     <head>
         <meta charset="UTF-8">
-        <style>
-            body { font-family: 'Segoe UI', sans-serif; margin: 40px; background: #f0f2f5; color: #1a237e; }
-            .container { max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-            h1 { border-bottom: 3px solid #1a237e; padding-bottom: 10px; margin-bottom: 5px; }
-            .meta { color: #666; font-size: 0.9em; margin-bottom: 20px; }
-            .badge { padding: 4px 10px; border-radius: 4px; font-size: 0.8em; font-weight: bold; }
-            .pass { background: #c8e6c9; color: #2e7d32; }
-            .high-prio { background: #ffcdd2; color: #b71c1c; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            th { background: #1a237e; color: white; padding: 12px; text-align: left; }
-            td { padding: 12px; border-bottom: 1px solid #eee; }
-            tr:hover { background: #f5f5f5; }
-        </style>
-        <title>BridgeFlow MBSE Dashboard</title>
+        <style>${cssContent}</style>
+        <title>BridgeFlow System Dashboard</title>
     </head>
     <body>
         <div class="container">
-            <h1>BridgeFlow Engineering Dashboard</h1>
-            <div class="meta">Status: <b>PASSED</b> | Generert: ${dateStr}</div>
+            <header>
+                <div>
+                    <h1>BridgeFlow System Dashboard</h1>
+                    <div style="color: #666;">Model-Based Systems Engineering Pipeline</div>
+                </div>
+                <div class="meta-info">
+                    <span class="badge status-pass">CI/CD ACTIVE</span><br>
+                    <small>${dateStr}</small>
+                </div>
+            </header>
+
+            <div class="stats-bar">
+                <div class="stat-card">
+                    <div class="stat-value">${requirements.length}</div>
+                    <div>Totale Krav</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${[...new Set(requirements.map(r => r.component))].length}</div>
+                    <div>Systemkomponenter</div>
+                </div>
+            </div>
             
             <table>
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Beskrivelse</th>
+                        <th>Kravbeskrivelse</th>
+                        <th>Komponent</th>
                         <th>Prioritet</th>
-                        <th>Verifisering</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -68,25 +81,32 @@ try {
                     <tr>
                         <td><strong>${req.id}</strong></td>
                         <td>${req.name}</td>
-                        <td><span class="badge ${req.priority === 'High' ? 'high-prio' : ''}">${req.priority}</span></td>
-                        <td><span class="badge pass">VERIFISERT</span></td>
+                        <td><span class="badge comp-tag">${req.component}</span></td>
+                        <td><span class="badge ${req.priority === 'High' ? 'prio-high' : 'prio-med'}">${req.priority}</span></td>
+                        <td><span class="badge status-pass">VERIFISERT</span></td>
                     </tr>
                     `).join('')}
                 </tbody>
             </table>
-            <footer style="margin-top: 40px; font-size: 0.8em; color: #888;">
-                Denne rapporten er en del av BridgeFlow-MBSE Digital Thread. Audit-logg finnes i /logs/pipeline.log.
+
+            <footer>
+                Denne rapporten er automatisk generert av BridgeFlow-MBSE Digital Thread.<br>
+                Audit-logg finnes i /logs/pipeline.log
             </footer>
         </div>
     </body>
     </html>`;
 
+    // Lagre HTML Dashboard
     fs.writeFileSync(path.join(outputDir, 'dashboard.html'), html);
-    writeLog('SUCCESS: HTML Dashboard generert.');
+    writeLog('SUCCESS: HTML Dashboard generert med ekstern styling.');
 
-    // Generer Markdown-kopi for GitHub-visning
-    let md = `# Engineering Status Report - ${dateStr}\n\n| ID | Beskrivelse | Prio |\n|---|---|---|\n`;
-    requirements.forEach(r => { md += `| ${r.id} | ${r.name} | ${r.priority} |\n`; });
+    // Lagre Markdown-rapport (For GitHub-oversikt)
+    let md = `# Engineering Status Report - ${dateStr}\n\n`;
+    md += `| ID | Beskrivelse | Komponent | Prio |\n|---|---|---|---|\n`;
+    requirements.forEach(r => {
+        md += `| ${r.id} | ${r.name} | ${r.component} | ${r.priority} |\n`;
+    });
     fs.writeFileSync(path.join(outputDir, 'Engineering_Status.md'), md);
     
     writeLog('SUCCESS: Pipeline fullført uten feil.');
