@@ -1,6 +1,7 @@
 /**
- * BridgeFlow Report Generator (Refaktorert)
+ * BridgeFlow Report Generator
  * Transformer JSON-modell til profesjonelt dashboard og Markdown.
+ * Inkluderer audit-logging for sporbarhet.
  */
 
 const fs = require('fs');
@@ -9,9 +10,9 @@ const path = require('path');
 // Definerer filstier
 const outputDir = './output';
 const logDir = './logs';
-const cssPath = path.join(__dirname, 'style.css'); // Stien til den nye CSS-fila
+const cssPath = path.join(__dirname, 'style.css');
 
-// Initialisering av mapper
+// Initialisering av mapper og filstruktur
 if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir);
 if (!fs.existsSync(logDir)) fs.mkdirSync(logDir);
 
@@ -27,13 +28,13 @@ function writeLog(message) {
 try {
     writeLog('Starter generering av rapporter...');
 
-    // Data og CSS
+    // Henter validert data fra Java-motoren og henter den ryddige stylingen
     const rawData = fs.readFileSync('requirements.json');
     const requirements = JSON.parse(rawData);
-    const cssContent = fs.readFileSync(cssPath, 'utf8'); // Henter den ryddige stylingen
+    const cssContent = fs.readFileSync(cssPath, 'utf8'); 
     const dateStr = new Date().toLocaleString('no-NO');
 
-    // Dashboard (HTML)
+    // HTML Dashboard med styling
     const html = `
     <!DOCTYPE html>
     <html lang="no">
@@ -73,17 +74,21 @@ try {
                         <th>Kravbeskrivelse</th>
                         <th>Komponent</th>
                         <th>Prioritet</th>
-                        <th>Status</th>
+                        <th>Sikkerhetssjekk</th>
                     </tr>
                 </thead>
                 <tbody>
                     ${requirements.map(req => `
-                    <tr>
+                    <tr class="${req.safety_check === 'WARNING' ? 'safety-row-warn' : ''}">
                         <td><strong>${req.id}</strong></td>
                         <td>${req.name}</td>
                         <td><span class="badge comp-tag">${req.component}</span></td>
                         <td><span class="badge ${req.priority === 'High' ? 'prio-high' : 'prio-med'}">${req.priority}</span></td>
-                        <td><span class="badge status-pass">VERIFISERT</span></td>
+                        <td>
+                            ${req.safety_check === 'WARNING' 
+                                ? '<span class="badge safety-warn">⚠️ SAFETY RISK</span>' 
+                                : '<span class="badge status-pass">VERIFISERT</span>'}
+                        </td>
                     </tr>
                     `).join('')}
                 </tbody>
@@ -101,7 +106,7 @@ try {
     fs.writeFileSync(path.join(outputDir, 'dashboard.html'), html);
     writeLog('SUCCESS: HTML Dashboard generert med ekstern styling.');
 
-    // Lagre Markdown-rapport (For GitHub-oversikt)
+    // Lagre Markdown-rapport for GitHub-visning
     let md = `# Engineering Status Report - ${dateStr}\n\n`;
     md += `| ID | Beskrivelse | Komponent | Prio |\n|---|---|---|---|\n`;
     requirements.forEach(r => {

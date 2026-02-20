@@ -49,7 +49,7 @@ output/             # Genererte JSON- og Markdown-rapporter
 scripts/            # Node.js-rapportgenerator
 src/                # Java-kildekode
 README.md           # Prosjektdokumentasjon
-run_pipeline.bat    # Hjælpeskript for Windows
+run_pipeline.bat    # Hjelpeskript for Windows
 ```
 
 ## Forutsetninger

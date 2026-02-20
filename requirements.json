@@ -2,11 +2,19 @@
   {
     "id": "VBA-101",
     "name": "Fuel_System",
+    "priority": "High",
+    "component": "Propulsion System",
+    "category": "Hardware",
+    "safety_check": "OK",
     "status": "Validated via Java"
   },
   {
     "id": "VBA-102",
     "name": "Wing_Span",
+    "priority": "Medium",
+    "component": "Propulsion System",
+    "category": "Hardware",
+    "safety_check": "WARNING",
     "status": "Validated via Java"
   }
 ]

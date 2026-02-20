@@ -1,8 +1,6 @@
-# Universal Systems Engineering Report
+# Engineering Status Report - 20.2.2026, 14:23:47
 
-## Project: High-Complexity Architecture
-
-| ID | Component | Status | Priority |
+| ID | Beskrivelse | Komponent | Prio |
 |---|---|---|---|
-| VBA-101 | Fuel_System | 🚧 Validated via Java | undefined |
-| VBA-102 | Wing_Span | 🚧 Validated via Java | undefined |
+| VBA-101 | Fuel_System | Propulsion System | High |
+| VBA-102 | Wing_Span | Propulsion System | Medium |
