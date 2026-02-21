@@ -53,7 +53,7 @@ Pipelinen består av tre domener:
 
 ```mermaid
 graph TD
-    subgraph Legacy [Legacy (Excel/VBA)]
+    subgraph Legacy ["Legacy Excel/VBA"]
         A[Ingeniørdata] -->|VBA-eksport| B(VBA_Export.csv)
     end
 
@@ -77,18 +77,18 @@ Hver komponent er isolert, noe som gjør det enkelt å bytte for eksempel CSV‑
 ## Prosjektstruktur
 
 ```
-src/                    # Java kildekode
-    Component.java      # Systemkomponent
-    ModelExtractor.java # Hovedmotor og eksportør
-    Requirement.java    # Kravmodell
-scripts/                # Rapportverktøy
-    report_generator.js
-    style.css
-legacy_excel/           # Input fra VBA‑eksporter
-output/                 # Genererte filer (HTML, ReqIF, MD)
-logs/                   # Pipeline‑logger
-run_pipeline.bat        # Kjør hele flyten
-README.md               # Denne dokumentasjonen
+├── src/                    # Java kildekode (Modell-logikk)
+│   ├── ModelExtractor.java  # Hovedmotor og eksportør
+│   ├── Requirement.java     # Datamodell for krav
+│   └── Component.java       # Datamodell for systemkomponenter
+├── scripts/                # Rapporteringsverktøy
+│   ├── report_generator.js  # Node.js generator
+│   └── style.css            # Profesjonell dashboard-styling
+├── legacy_excel/           # Input-mappe for VBA-eksporter (.csv)
+├── output/                 # Genererte filer (HTML, ReqIF, Markdown)
+├── logs/                   # Audit-logger for DevOps-sporbarhet
+├── run_pipeline.bat        # "One-click" automatiseringsskript
+└── README.md               # Systemdokumentasjon
 ```
 ## Forutsetninger
 
