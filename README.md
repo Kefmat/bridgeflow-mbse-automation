@@ -54,17 +54,17 @@ Pipelinen består av tre domener:
 ```mermaid
 graph TD
     subgraph Legacy["Legacy Excel/VBA"]
-        …
+        A[Ingeniørdata] -->|VBA-eksportskript| B(VBA_Export.csv)
     end
-    …
-    subgraph Processing [Behandling (Java)]
+
+    subgraph Processing["Behandlingsdomenet (Java)"]
         B -->|Fil-I/O| C[ModelExtractor.java]
         C -->|Validering| D{Requirement.java}
         D -->|Gyldige data| E[JSON-output]
     end
 
-    subgraph Reporting [Rapportering (Node.js)]
-        E -->|Konsumeres| F(requirements.json)
+    subgraph Reporting["Rapporteringsdomenet (Node.js)"]
+        E -->|Konsumerer| F(requirements.json)
         F -->|Genererer| G[report_generator.js]
         G -->|Produserer| H[Engineering_Status.md]
     end
