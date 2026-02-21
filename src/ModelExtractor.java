@@ -96,4 +96,31 @@ public class ModelExtractor {
             System.out.println("[SUCCESS] Systemmodell med relasjoner lagret til JSON.");
         }
     }
+    /**
+    * FUNKSJON: ReqIF XML Eksport
+    * Genererer en industri-standard XML for utveksling av krav.
+    */
+    private static void writeToReqIF(List<Requirement> list, String filename) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
+            writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+            writer.write("<REQ-IF xmlns=\"http://www.omg.org/spec/ReqIF/20110401/reqif.xsd\">\n");
+            writer.write("  <CORE-CONTENT>\n");
+            writer.write("    <SPEC-OBJECTS>\n");
+        
+            for (Requirement r : list) {
+                writer.write("      <SPEC-OBJECT IDENTIFIER=\"" + r.getId() + "\">\n");
+                writer.write("        <VALUES>\n");
+                writer.write("          <ATTRIBUTE-VALUE-STRING VALUE=\"" + r.getName() + "\"/>\n");
+                writer.write("          <ATTRIBUTE-VALUE-STRING VALUE=\"" + r.getPriority() + "\"/>\n");
+                writer.write("        </VALUES>\n");
+                writer.write("      </SPEC-OBJECT>\n");
+            }
+         
+            writer.write("    </SPEC-OBJECTS>\n");
+            writer.write("  </CORE-CONTENT>\n");
+            writer.write("</REQ-IF>");
+            System.out.println("[SUCCESS] ReqIF-eksport fullført (Industristandard format).");
+        }
+    }
+        
 }
